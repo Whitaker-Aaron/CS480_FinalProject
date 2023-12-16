@@ -59,9 +59,16 @@ void Engine::Run()
 }
 
 void Engine::ProcessInput()
+
+
 {
+
+    bool input[9] = { false, false, false, false, false, false, false, false, false };
+
     if (glfwGetKey(m_window->getWindow(), GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(m_window->getWindow(), true);
+
+  
 
     //std::cout << "Xpos: " << cursor_x << std::endl;
     //std::cout << "Ypos: " << cursor_y << std::endl;
@@ -77,22 +84,22 @@ void Engine::ProcessInput()
 
         if (cursor_x > initial_x) {
             //rotAngle = 0.1;
-            rotVec = { 1.f, 0.f, 0.f };
+            rotVec = { 0.5f, 0.f, 0.f };
         }
 
         if (cursor_x < initial_x) {
             //rotAngle = -0.1;
-            rotVec = { -1.f, 0.f, 0.f };
+            rotVec = { -0.5f, 0.f, 0.f };
         }
 
         if (cursor_y > initial_y) {
             //rotAngle = 0.1;
-            rotVec = { 0.f, 1.f, 0.f };
+            rotVec = { 0.f, 0.5f, 0.f };
         }
 
         if (cursor_y < initial_y) {
             //rotAngle = -0.1;
-            rotVec = { 0.f, -1.f, 0.f };
+            rotVec = { 0.f, -0.5f, 0.f };
         }
 
         initial_x = cursor_x;
@@ -120,23 +127,63 @@ void Engine::ProcessInput()
         glfwGetKey(m_window->getWindow(), GLFW_KEY_S) == GLFW_RELEASE &&
         glfwGetKey(m_window->getWindow(), GLFW_KEY_D) == GLFW_RELEASE) {
 
-        m_graphics->getCamera()->updateViewMatrix(0, rotAngle, rotVec);
+        m_graphics->getCamera()->updateViewMatrix(input, 0, cursor_x, cursor_y, rotAngle, rotVec);
     }
 
 
     //Pressing W moves the camera forward (+1 on the Z-axis) and pressing S moves the camera backwards (-1 on the Z-axis).
-    if (glfwGetKey(m_window->getWindow(), GLFW_KEY_W) == GLFW_PRESS)
-        m_graphics->getCamera()->updateViewMatrix(1, rotAngle, rotVec);
+    if (glfwGetKey(m_window->getWindow(), GLFW_KEY_W) == GLFW_PRESS) {
+        input[0] = true;
+        //m_graphics->getCamera()->updateViewMatrix(1, rotAngle, rotVec);
+    }
 
-    //if (glfwGetKey(m_window->getWindow(), GLFW_KEY_A) == GLFW_PRESS)
-    //   m_graphics->getCamera()->updateViewMatrix(glm::vec3(-0.1f, 0.0f, 0.0f), rotAngle, rotVec);
+    if (glfwGetKey(m_window->getWindow(), GLFW_KEY_A) == GLFW_PRESS) {
+        input[1] = true;
+        //   m_graphics->getCamera()->updateViewMatrix(glm::vec3(-0.1f, 0.0f, 0.0f), rotAngle, rotVec);
+    }
 
-    if (glfwGetKey(m_window->getWindow(), GLFW_KEY_S) == GLFW_PRESS)
-        m_graphics->getCamera()->updateViewMatrix(-1, rotAngle, rotVec);
+    if (glfwGetKey(m_window->getWindow(), GLFW_KEY_S) == GLFW_PRESS) {
+        input[2] = true;
+        //m_graphics->getCamera()->updateViewMatrix(-1, rotAngle, rotVec);
+    }
 
-    //if (glfwGetKey(m_window->getWindow(), GLFW_KEY_D) == GLFW_PRESS)
-    //   m_graphics->getCamera()->updateViewMatrix(glm::vec3(0.1f, 0.0f, 0.0f), rotAngle, rotVec);
+    if (glfwGetKey(m_window->getWindow(), GLFW_KEY_D) == GLFW_PRESS) {
+        input[3] = true;
+        //   m_graphics->getCamera()->updateViewMatrix(glm::vec3(0.1f, 0.0f, 0.0f), rotAngle, rotVec);
+    }
 
+    if (glfwGetKey(m_window->getWindow(), GLFW_KEY_SPACE) == GLFW_PRESS) {
+        input[4] = true;
+        //   m_graphics->getCamera()->updateViewMatrix(glm::vec3(0.1f, 0.0f, 0.0f), rotAngle, rotVec);
+    }
+
+    if (glfwGetKey(m_window->getWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
+        input[5] = true;
+        //   m_graphics->getCamera()->updateViewMatrix(glm::vec3(0.1f, 0.0f, 0.0f), rotAngle, rotVec);
+    }
+
+    if (glfwGetKey(m_window->getWindow(), GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+        input[6] = true;
+        //   m_graphics->getCamera()->updateViewMatrix(glm::vec3(0.1f, 0.0f, 0.0f), rotAngle, rotVec);
+    }
+
+    if (glfwGetKey(m_window->getWindow(), GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE) {
+        input[7] = true;
+        //   m_graphics->getCamera()->updateViewMatrix(glm::vec3(0.1f, 0.0f, 0.0f), rotAngle, rotVec);
+    }
+
+    if (glfwGetMouseButton(m_window->getWindow(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+        input[8] = true;
+        std::cout << "LEFT MOUSE HITTTT" << std::endl;
+        //   m_graphics->getCamera()->updateViewMatrix(glm::vec3(0.1f, 0.0f, 0.0f), rotAngle, rotVec);
+    }
+
+
+
+    if(glfwGetKey)
+
+    
+    m_graphics->getCamera()->updateViewMatrix(input, 0, cursor_x, cursor_y, rotAngle, rotVec);
 
 }
 

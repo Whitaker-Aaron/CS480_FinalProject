@@ -1,4 +1,5 @@
 #include "camera.h"
+#include <glm/gtx/vector_angle.hpp>
 
 Camera::Camera()
 {
@@ -16,6 +17,10 @@ bool Camera::Initialize(int w, int h)
     //  if you will be having a moving camera the view matrix will need to more dynamic
     //  ...Like you should update it before you render more dynamic 
     //  for this project having them static will be fine
+
+    for (int i = 0; i < 9; i++) {
+        pressed[i] = {false};
+    }
 
     view = glm::lookAt(cameraPos, //Eye Position
         cameraFront, //Focus point
@@ -48,15 +53,102 @@ glm::mat4 Camera::GetView()
     return view;
 }
 
-void Camera::updateViewMatrix(int zed, float rotAngle, glm::vec3 rotVec) {
+void Camera::updateViewMatrix(bool arr[], double xcoord, double ycoord, int zed, float rotAngle, glm::vec3 rotVec) {
 
 
-    posZ += zed;
+    /*posZ += zed;
     cameraPos = { posX, posY, posZ };
-    cameraFront += rotVec;
+    cameraFront += rotVec;*/
+    //cameraFront += rotVec;
+
+    for (int i = 0; i < 9; i++) {
+        pressed[i] = arr[i];
+    }
+
+    if (pressed[0] == true) {
+
+        cameraPos += speed * 10 * cameraFront;
+        std::cout << "Up key pressed" << std::endl;
+
+    }
+
+    if (pressed[1] == true) {
+
+        cameraPos += speed * -glm::normalize(glm::cross(cameraFront, cameraUp));
+        std::cout << "Left key pressed" << std::endl;
+
+    }
+
+    if (pressed[2] == true) {
+
+
+        cameraPos += speed * 10 * -cameraFront; 
+        std::cout << "Down key pressed" << std::endl;
+    }
+
+    if (pressed[3] == true) {
+
+        cameraPos += speed * glm::normalize(glm::cross(cameraFront, cameraUp));
+        std::cout << "Right key pressed" << std::endl;
+
+    }
+
+    if (pressed[4] == true) {
+
+        cameraPos += speed * cameraUp;
+        std::cout << "Space key pressed" << std::endl;
+
+    }
+
+    if (pressed[5] == true) {
+
+        cameraPos += speed * -cameraUp;
+        std::cout << "Left control key pressed" << std::endl;
+
+    }
+
+    if (pressed[6] == true) {
+
+        speed = 0.2f;
+        std::cout << "Left shift key pressed" << std::endl;
+
+    }
+
+    else if (pressed[7] == true) {
+
+        speed = 0.1f;
+        //std::cout << "Right key pressed" << std::endl;
+
+    }
+
+
+    if (pressed[8] == true) {
+
+        
+        std::cout << "Left mouse pressed" << std::endl;
+        float xRotation = sensitivity * (float)(ycoord - (Height / 2)) / Height;
+        float yRotation = sensitivity * (float)(xcoord - (Width / 2)) / Width;
+
+        glm::vec3 nextCameraFront = glm::rotate(cameraFront, glm::radians(-xRotation), glm::normalize(glm::cross(cameraFront, cameraUp)));
+
+   
+
+
+        if (abs(glm::angle(nextCameraFront, cameraUp) - glm::radians(90.0f)) <= glm::radians(85.0f)) {
+            
+            cameraFront = nextCameraFront;
+
+        }
+
+        cameraFront = glm::rotate(cameraFront, glm::radians(-yRotation), cameraUp);
+
+
+    }
+
+
 
     view = glm::lookAt(cameraPos, //Eye Position
-        cameraFront, //Focus point
+        cameraFront + cameraPos, //Focus point
         cameraUp); //Positive Y is up*/
 
 
