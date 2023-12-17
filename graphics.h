@@ -9,7 +9,11 @@ using namespace std;
 #include "pyramid.h"
 #include "camera.h"
 #include "shader.h"
+#include "lightShader.h"
+#include "skyboxShader.h"
 #include "object.h"
+#include "lightsource.h"
+#include "cubemap.h"
 #include "sphere.h"
 #include "mesh.h"
 
@@ -40,7 +44,11 @@ private:
 
     Camera* m_camera;
     Shader* m_shader;
+    Lightshader* m_lightshader;
+    Skyboxshader* m_skyboxshader;
+    
 
+    //For Default Shader
     GLint m_projectionMatrix;
     GLint m_viewMatrix;
     GLint m_modelMatrix;
@@ -48,6 +56,29 @@ private:
     GLint m_colorAttrib;
     GLint m_tcAttrib;
     GLint m_hasTexture;
+    GLint m_lightColor;
+    GLint m_lightPos;
+    GLint m_camPos;
+
+    //For Light Shader
+    GLint m_projectionMatrix2;
+    GLint m_viewMatrix2;
+    GLint m_modelMatrix2;
+    GLint m_positionAttrib2;
+    GLint m_colorAttrib2;
+    GLint m_tcAttrib2;
+    GLint m_hasTexture2;
+    GLint m_lightColor2;
+
+    //For Skybox Shader
+    GLint m_projectionMatrix3;
+    GLint m_viewMatrix3;
+    GLint m_modelMatrix3;
+    GLint m_positionAttrib3;
+
+    glm::vec4 light;
+    glm::vec3 lightPosition = { 0.0f, 0.0f, 0.0f };
+
 
     Pyramid* m_pyramid;
 
@@ -73,7 +104,8 @@ private:
     Mesh* m_mesh;
     Mesh* m_mesh2;
 
-
+    Lightsource* m_lightsource;
+    Cubemap* m_cubemap;
 
 };
 

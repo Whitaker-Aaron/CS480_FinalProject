@@ -53,7 +53,7 @@ glm::mat4 Camera::GetView()
     return view;
 }
 
-void Camera::updateViewMatrix(bool arr[], double xcoord, double ycoord, int zed, float rotAngle, glm::vec3 rotVec) {
+bool Camera::updateViewMatrix(bool arr[], double xcoord, double ycoord, int zed, float rotAngle, glm::vec3 rotVec) {
 
 
     /*posZ += zed;
@@ -124,13 +124,15 @@ void Camera::updateViewMatrix(bool arr[], double xcoord, double ycoord, int zed,
 
     if (pressed[8] == true) {
 
+        clicked = true;
         
         std::cout << "Left mouse pressed" << std::endl;
         float xRotation = sensitivity * (float)(ycoord - (Height / 2)) / Height;
         float yRotation = sensitivity * (float)(xcoord - (Width / 2)) / Width;
 
         glm::vec3 nextCameraFront = glm::rotate(cameraFront, glm::radians(-xRotation), glm::normalize(glm::cross(cameraFront, cameraUp)));
-
+        std::cout << xcoord << std::endl;
+        std::cout << ycoord << std::endl;
    
 
 
@@ -143,6 +145,9 @@ void Camera::updateViewMatrix(bool arr[], double xcoord, double ycoord, int zed,
         cameraFront = glm::rotate(cameraFront, glm::radians(-yRotation), cameraUp);
 
 
+    }
+    else {
+        clicked = false;
     }
 
 
@@ -157,6 +162,8 @@ void Camera::updateViewMatrix(bool arr[], double xcoord, double ycoord, int zed,
         0.01f, //Distance to the near plane, normally a small value like this
         100.0f); //Distance to the far plane,*/
 
+
+    return clicked;
 }
 
 void Camera::updateProjectionMatrix(float offset) {

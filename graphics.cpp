@@ -70,6 +70,62 @@ bool Graphics::Initialize(int width, int height)
 		return false;
 	}
 
+	m_lightshader = new Lightshader();
+	if (!m_lightshader->Initialize()) {
+		printf("Light shader Failed to Initialize\n");
+		return false;
+	}
+
+	// Add the vertex shader
+	if (!m_lightshader->AddShader(GL_VERTEX_SHADER))
+	{
+		printf("Vertex Light Shader failed to Initialize\n");
+		return false;
+	}
+
+	// Add the fragment shader
+	if (!m_lightshader->AddShader(GL_FRAGMENT_SHADER))
+	{
+		printf("Fragment Light Shader failed to Initialize\n");
+		return false;
+	}
+
+	// Connect the program
+	if (!m_lightshader->Finalize())
+	{
+		printf("Program to Finalize\n");
+		return false;
+	}
+
+	m_skyboxshader = new Skyboxshader();
+	if (!m_skyboxshader->Initialize())
+	{
+		printf("Shader Failed to Initialize\n");
+		return false;
+	}
+
+	// Add the vertex shader
+	if (!m_skyboxshader->AddShader(GL_VERTEX_SHADER))
+	{
+		printf("Vertex Shader failed to Initialize\n");
+		return false;
+	}
+
+	// Add the fragment shader
+	if (!m_skyboxshader->AddShader(GL_FRAGMENT_SHADER))
+	{
+		printf("Fragment Shader failed to Initialize\n");
+		return false;
+	}
+
+	// Connect the program
+	if (!m_skyboxshader->Finalize())
+	{
+		printf("Program to Finalize\n");
+		return false;
+	}
+
+
 	// Populate location bindings of the shader uniform/attribs
 	if (!collectShPrLocs()) {
 		printf("Some shader attribs not located!\n");
@@ -80,7 +136,11 @@ bool Graphics::Initialize(int width, int height)
 
 
 	//Asteroid Belt between Mars and Jupiter
-	m_mesh2 = new Mesh(glm::vec3(2.0f, 3.0f, -5.0f), "FinalProjectAssets\\10464_Asteroid_v1_Iterations-2.obj", "FinalProjectAssets\\10464_Asteroid_v1_diffuse.jpg", true);
+	//m_mesh2 = new Mesh(glm::vec3(2.0f, 3.0f, -5.0f), "FinalProjectAssets\\10464_Asteroid_v1_Iterations-2.obj", "FinalProjectAssets\\10464_Asteroid_v1_diffuse.jpg", true);
+
+	m_lightsource = new Lightsource(lightPosition);
+	m_cubemap = new Cubemap();
+
 
 	// The Sun
 	m_sphere = new Sphere(64, "FinalProjectAssets\\PlanetaryTextures\\2k_sun.jpg");
@@ -157,7 +217,7 @@ void Graphics::HierarchicalUpdate2(double dt) {
 
 
 	// position of the first planet
-	speed = { 0.5, 0.5, 0.5 };
+	speed = { 0.25, 0.25, 0.25 };
 	dist = { 6., 0, 6. };
 	rotVector = { 1.,1.,1. };
 	rotSpeed = { 1., 1., 1. };
@@ -173,7 +233,7 @@ void Graphics::HierarchicalUpdate2(double dt) {
 
 
 	// position of the first planet
-	speed = { 0.54, 0.54, 0.54 };
+	speed = { 0.27, 0.27, 0.27 };
 	dist = { 12., 0, 12. };
 	rotVector = { 1.,1.,1. };
 	rotSpeed = { 1., 1., 1. };
@@ -190,7 +250,7 @@ void Graphics::HierarchicalUpdate2(double dt) {
 
 
 	// position of Earth
-	speed = { .57, .57, .57 };
+	speed = { .28, .28, .28 };
 	dist = { 16., 0, 16. };
 	rotVector = { .9,.9,.9 };
 	rotSpeed = { 1., 1., 1. };
@@ -206,7 +266,7 @@ void Graphics::HierarchicalUpdate2(double dt) {
 
 	
 // position of Earth's moon
-	speed = { 1, 1, 1 };
+	speed = { 0.5, 0.5, 0.5 };
 	dist = { 1.25, 1.25, 0. };
 
 //setting to 0.4 offsets the x-axis so its rotated at an angle.
@@ -228,7 +288,7 @@ void Graphics::HierarchicalUpdate2(double dt) {
 	}
 
 	// position of Mars
-	speed = { .52, .52, .52 };
+	speed = { .26, .26, .26 };
 	dist = { 20., 0, 20. };
 	rotVector = { 1.,1.,1. };
 	rotSpeed = { 1., 1., 1. };
@@ -243,7 +303,7 @@ void Graphics::HierarchicalUpdate2(double dt) {
 		m_sphere6->Update(localTransform);
 
 	// position of Mars's first moon
-	speed = { 1, 1, 1 };
+	speed = { 0.5, 0.5, 0.5 };
 	dist = { 1.20, 1.20, 0. };
 
 	//setting to 0.4 offsets the x-axis so its rotated at an angle.
@@ -259,13 +319,13 @@ void Graphics::HierarchicalUpdate2(double dt) {
 
 
 	if (m_sphere14 != NULL) {
-		std::cout << "Mar's moon working" << std::endl;
+		
 		m_sphere14->Update(localTransform);
 		//modelStack.pop();
 	}
 
 	// position of Mars's second moon
-	speed = { 1.1, 1.1, 1.1 };
+	speed = { .56, .56, .56 };
 	dist = { 1.5, 1.5, 0. };
 
 	//setting to 0.4 offsets the x-axis so its rotated at an angle.
@@ -280,13 +340,13 @@ void Graphics::HierarchicalUpdate2(double dt) {
 	localTransform *= glm::scale(glm::vec3(scale[0], scale[1], scale[2]));
 
 	if (m_sphere15 != NULL) {
-		std::cout << "Mar's second moon working" << std::endl;
+		
 		m_sphere15->Update(localTransform);
 		modelStack.pop();
 	}
 
 	// position of the asteroid belt
-	speed = { 0.5, 0.5, 0.5 };
+	speed = { 0.25, 0.25, 0.25 };
 	dist = { 21.5, 0, 21.5 };
 	rotVector = { 1.,1.,1. };
 	rotSpeed = { 1., 1., 1. };
@@ -304,7 +364,7 @@ void Graphics::HierarchicalUpdate2(double dt) {
 
 
 	// position of the first planet
-	speed = { 0.5, 0.5, 0.5 };
+	speed = { 0.25, 0.25, 0.25 };
 	dist = { 23., 0, 23. };
 	rotVector = { 1.,1.,1. };
 	rotSpeed = { 1., 1., 1. };
@@ -319,7 +379,7 @@ void Graphics::HierarchicalUpdate2(double dt) {
 		m_sphere11->Update(localTransform);
 
 	// position of Jupiter
-	speed = { .49, .49, .49 };
+	speed = { .24, .24, .24 };
 		dist = { 28., 0, 28. };
 	rotVector = { 1.,1.,1. };
 	rotSpeed = { 1., 1., 1. };
@@ -334,7 +394,7 @@ void Graphics::HierarchicalUpdate2(double dt) {
 		m_sphere7->Update(localTransform);
 
 	// position of Mars's first moon
-	speed = { 1, 1, 1 };
+	speed = { .5, .5, .5 };
 	dist = { 2.20, 2.20, 0. };
 
 	//setting to 0.4 offsets the x-axis so its rotated at an angle.
@@ -350,13 +410,13 @@ void Graphics::HierarchicalUpdate2(double dt) {
 
 
 	if (m_sphere16 != NULL) {
-		std::cout << "Mar's moon working" << std::endl;
+		
 		m_sphere16->Update(localTransform);
 		//modelStack.pop();
 	}
 	
 	// position of Mars's second moon
-	speed = { 1.1, 1.1, 1.1 };
+	speed = { .6, .6, .6 };
 	dist = { 2.5, 2.5, 0. };
 
 	//setting to 0.4 offsets the x-axis so its rotated at an angle.
@@ -371,7 +431,7 @@ void Graphics::HierarchicalUpdate2(double dt) {
 	localTransform *= glm::scale(glm::vec3(scale[0], scale[1], scale[2]));
 
 	if (m_sphere17 != NULL) {
-		std::cout << "Mar's second moon working" << std::endl;
+	
 		m_sphere17->Update(localTransform);
 		modelStack.pop();
 	}
@@ -379,7 +439,7 @@ void Graphics::HierarchicalUpdate2(double dt) {
 
 
 	// position of the first planet
-	speed = { .51, .51, .51 };
+	speed = { .26, .26, .26 };
 	dist = { 35., 0, 35. };
 	rotVector = { 1.,1.,1. };
 	rotSpeed = { 1., 1., 1. };
@@ -394,7 +454,7 @@ void Graphics::HierarchicalUpdate2(double dt) {
 		m_sphere8->Update(localTransform);
 
 	// position of the first planet
-	speed = { .61, .61, .61 };
+	speed = { .31, .31, .31 };
 	dist = { 40., 0, 40. };
 	rotVector = { 1.,1.,1. };
 	rotSpeed = { 1., 1., 1. };
@@ -409,7 +469,7 @@ void Graphics::HierarchicalUpdate2(double dt) {
 		m_sphere9->Update(localTransform);
 
 	// position of the first planet
-	speed = { .52, .52, .52 };
+	speed = { .26, .26, .26 };
 	dist = { 46., 0, 46. };
 	rotVector = { 1.,1.,1. };
 	rotSpeed = { 1., 1., 1. };
@@ -424,7 +484,7 @@ void Graphics::HierarchicalUpdate2(double dt) {
 		m_sphere10->Update(localTransform);
 
 	// position of the first planet
-	speed = { 0.55, 0.55, 0.55 };
+	speed = { 0.27, 0.27, 0.27 };
 	dist = { 51., 0, 51. };
 	rotVector = { 1.,1.,1. };
 	rotSpeed = { 1., 1., 1. };
@@ -439,7 +499,7 @@ void Graphics::HierarchicalUpdate2(double dt) {
 		m_sphere13->Update(localTransform);
 
 	// position of the first planet
-	speed = { 0.53, 0.53, 0.53 };
+	speed = { 0.26, 0.26, 0.26 };
 	dist = { 57., 0, 57. };
 	rotVector = { 1.,1.,1. };
 	rotSpeed = { 1., 1., 1. };
@@ -475,9 +535,42 @@ void Graphics::ComputeTransforms(double dt, std::vector<float> speed, std::vecto
 
 void Graphics::Render()
 {
+
+
 	//clear the screen
-	glClearColor(0.5, 0.2, 0.2, 1.0);
+	glClearColor(0.0, 0.0, 0.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	m_lightshader->Enable();
+	glUniformMatrix4fv(m_projectionMatrix2, 1, GL_FALSE, glm::value_ptr(m_camera->GetProjection()));
+	glUniformMatrix4fv(m_viewMatrix2, 1, GL_FALSE, glm::value_ptr(m_camera->GetView()));
+
+	/*if (m_lightsource != NULL) {
+
+		glUniformMatrix4fv(m_modelMatrix2, 1, GL_FALSE, glm::value_ptr(m_lightsource->GetModel())); 
+		light = m_lightsource->getLightColor();
+
+			m_lightsource->Render(m_positionAttrib2, m_colorAttrib2, m_lightColor);
+		
+
+	}*/
+
+	if (m_sphere != NULL) {
+		glUniformMatrix4fv(m_modelMatrix2, 1, GL_FALSE, glm::value_ptr(m_sphere->GetModel()));
+		if (m_sphere->hasTex) {
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, m_sphere->getTextureID());
+			GLuint sampler = m_lightshader->GetUniformLocation("sp");
+			if (sampler == INVALID_UNIFORM_LOCATION)
+			{
+				printf("Sampler Not found not found\n");
+			}
+			glUniform1i(sampler, 0);
+			glUniform4f(m_lightColor2, 1.0f, 1.0f, 1.0f, 1.0f);
+			m_sphere->Render(m_positionAttrib2, m_colorAttrib2, m_tcAttrib2, m_hasTexture2);
+		}
+	}
+
 
 	// Start the correct program
 	m_shader->Enable();
@@ -486,11 +579,14 @@ void Graphics::Render()
 	glUniformMatrix4fv(m_projectionMatrix, 1, GL_FALSE, glm::value_ptr(m_camera->GetProjection()));
 	glUniformMatrix4fv(m_viewMatrix, 1, GL_FALSE, glm::value_ptr(m_camera->GetView()));
 
+
+
 	// Render the objects
 	/*if (m_cube != NULL){
 		glUniformMatrix4fv(m_modelMatrix, 1, GL_FALSE, glm::value_ptr(m_cube->GetModel()));
 		m_cube->Render(m_positionAttrib,m_colorAttrib);
 	}*/
+
 
 	if (m_mesh != NULL) {
 
@@ -505,6 +601,7 @@ void Graphics::Render()
 				printf("Sampler Not found not found\n");
 			}
 			glUniform1i(sampler, 0);
+			glUniform4f(m_lightColor, light.x, light.y, light.z, light.w);
 			m_mesh->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
 		}
 	}
@@ -522,6 +619,7 @@ void Graphics::Render()
 				printf("Sampler Not found not found\n");
 			}
 			glUniform1i(sampler, 0);
+			glUniform4f(m_lightColor, light.x, light.y, light.z, light.w);
 			m_mesh2->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
 		}
 	}
@@ -533,20 +631,7 @@ void Graphics::Render()
 		m_pyramid->Render(m_positionAttrib, m_colorAttrib);
 	}
 
-	if (m_sphere != NULL) {
-		glUniformMatrix4fv(m_modelMatrix, 1, GL_FALSE, glm::value_ptr(m_sphere->GetModel()));
-		if (m_sphere->hasTex) {
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, m_sphere->getTextureID());
-			GLuint sampler = m_shader->GetUniformLocation("sp");
-			if (sampler == INVALID_UNIFORM_LOCATION)
-			{
-				printf("Sampler Not found not found\n");
-			}
-			glUniform1i(sampler, 0);
-			m_sphere->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
-		}
-	}
+	
 
 	if (m_sphere2 != NULL) {
 		glUniformMatrix4fv(m_modelMatrix, 1, GL_FALSE, glm::value_ptr(m_sphere2->GetModel()));
@@ -559,6 +644,9 @@ void Graphics::Render()
 				printf("Sampler Not found not found\n");
 			}
 			glUniform1i(sampler, 0);
+			glUniform4f(m_lightColor, light.x, light.y, light.z, light.w);
+			glUniform3f(m_lightPos, lightPosition.x, lightPosition.y, lightPosition.z);
+			glUniform3f(m_camPos, m_camera->getCameraPos().x, m_camera->getCameraPos().y, m_camera->getCameraPos().z);
 			m_sphere2->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
 		}
 	}
@@ -574,6 +662,9 @@ void Graphics::Render()
 				printf("Sampler Not found not found\n");
 			}
 			glUniform1i(sampler, 0);
+			glUniform4f(m_lightColor, light.x, light.y, light.z, light.w);
+			glUniform3f(m_lightPos, lightPosition.x, lightPosition.y, lightPosition.z);
+			glUniform3f(m_camPos, m_camera->getCameraPos().x, m_camera->getCameraPos().y, m_camera->getCameraPos().z);
 			m_sphere3->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
 		}
 	}
@@ -589,6 +680,9 @@ void Graphics::Render()
 				printf("Sampler Not found not found\n");
 			}
 			glUniform1i(sampler, 0);
+			glUniform4f(m_lightColor, light.x, light.y, light.z, light.w);
+			glUniform3f(m_lightPos, lightPosition.x, lightPosition.y, lightPosition.z);
+			glUniform3f(m_camPos, m_camera->getCameraPos().x, m_camera->getCameraPos().y, m_camera->getCameraPos().z);
 			m_sphere4->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
 		}
 	}
@@ -603,6 +697,9 @@ void Graphics::Render()
 				printf("Sampler Not found not found\n");
 			}
 			glUniform1i(sampler, 0);
+			glUniform4f(m_lightColor, light.x, light.y, light.z, light.w);
+			glUniform3f(m_lightPos, lightPosition.x, lightPosition.y, lightPosition.z);
+			glUniform3f(m_camPos, m_camera->getCameraPos().x, m_camera->getCameraPos().y, m_camera->getCameraPos().z);
 			m_sphere5->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
 			}
 		}
@@ -618,6 +715,9 @@ void Graphics::Render()
 				printf("Sampler Not found not found\n");
 			}
 			glUniform1i(sampler, 0);
+			glUniform4f(m_lightColor, light.x, light.y, light.z, light.w);
+			glUniform3f(m_lightPos, lightPosition.x, lightPosition.y, lightPosition.z);
+			glUniform3f(m_camPos, m_camera->getCameraPos().x, m_camera->getCameraPos().y, m_camera->getCameraPos().z);
 			m_sphere6->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
 		}
 	}
@@ -633,6 +733,9 @@ void Graphics::Render()
 				printf("Sampler Not found not found\n");
 			}
 			glUniform1i(sampler, 0);
+			glUniform4f(m_lightColor, light.x, light.y, light.z, light.w);
+			glUniform3f(m_lightPos, lightPosition.x, lightPosition.y, lightPosition.z);
+			glUniform3f(m_camPos, m_camera->getCameraPos().x, m_camera->getCameraPos().y, m_camera->getCameraPos().z);
 			m_sphere7->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
 		}
 	}
@@ -648,6 +751,9 @@ void Graphics::Render()
 				printf("Sampler Not found not found\n");
 			}
 			glUniform1i(sampler, 0);
+			glUniform4f(m_lightColor, light.x, light.y, light.z, light.w);
+			glUniform3f(m_lightPos, lightPosition.x, lightPosition.y, lightPosition.z);
+			glUniform3f(m_camPos, m_camera->getCameraPos().x, m_camera->getCameraPos().y, m_camera->getCameraPos().z);
 			m_sphere8->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
 		}
 	}
@@ -663,6 +769,9 @@ void Graphics::Render()
 				printf("Sampler Not found not found\n");
 			}
 			glUniform1i(sampler, 0);
+			glUniform4f(m_lightColor, light.x, light.y, light.z, light.w);
+			glUniform3f(m_lightPos, lightPosition.x, lightPosition.y, lightPosition.z);
+			glUniform3f(m_camPos, m_camera->getCameraPos().x, m_camera->getCameraPos().y, m_camera->getCameraPos().z);
 			m_sphere9->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
 		}
 	}
@@ -678,6 +787,9 @@ void Graphics::Render()
 				printf("Sampler Not found not found\n");
 			}
 			glUniform1i(sampler, 0);
+			glUniform4f(m_lightColor, light.x, light.y, light.z, light.w);
+			glUniform3f(m_lightPos, lightPosition.x, lightPosition.y, lightPosition.z);
+			glUniform3f(m_camPos, m_camera->getCameraPos().x, m_camera->getCameraPos().y, m_camera->getCameraPos().z);
 			m_sphere10->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
 		}
 	}
@@ -693,6 +805,9 @@ void Graphics::Render()
 				printf("Sampler Not found not found\n");
 			}
 			glUniform1i(sampler, 0);
+			glUniform4f(m_lightColor, light.x, light.y, light.z, light.w);
+			glUniform3f(m_lightPos, lightPosition.x, lightPosition.y, lightPosition.z);
+			glUniform3f(m_camPos, m_camera->getCameraPos().x, m_camera->getCameraPos().y, m_camera->getCameraPos().z);
 			m_sphere11->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
 		}
 	}
@@ -708,6 +823,9 @@ void Graphics::Render()
 				printf("Sampler Not found not found\n");
 			}
 			glUniform1i(sampler, 0);
+			glUniform4f(m_lightColor, light.x, light.y, light.z, light.w);
+			glUniform3f(m_lightPos, lightPosition.x, lightPosition.y, lightPosition.z);
+			glUniform3f(m_camPos, m_camera->getCameraPos().x, m_camera->getCameraPos().y, m_camera->getCameraPos().z);
 			m_sphere12->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
 		}
 	}
@@ -723,6 +841,9 @@ void Graphics::Render()
 				printf("Sampler Not found not found\n");
 			}
 			glUniform1i(sampler, 0);
+			glUniform4f(m_lightColor, light.x, light.y, light.z, light.w);
+			glUniform3f(m_lightPos, lightPosition.x, lightPosition.y, lightPosition.z);
+			glUniform3f(m_camPos, m_camera->getCameraPos().x, m_camera->getCameraPos().y, m_camera->getCameraPos().z);
 			m_sphere13->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
 		}
 	}
@@ -738,6 +859,9 @@ void Graphics::Render()
 				printf("Sampler Not found not found\n");
 			}
 			glUniform1i(sampler, 0);
+			glUniform4f(m_lightColor, light.x, light.y, light.z, light.w);
+			glUniform3f(m_lightPos, lightPosition.x, lightPosition.y, lightPosition.z);
+			glUniform3f(m_camPos, m_camera->getCameraPos().x, m_camera->getCameraPos().y, m_camera->getCameraPos().z);
 			m_sphere14->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
 		}
 	}
@@ -753,6 +877,9 @@ void Graphics::Render()
 				printf("Sampler Not found not found\n");
 			}
 			glUniform1i(sampler, 0);
+			glUniform4f(m_lightColor, light.x, light.y, light.z, light.w);
+			glUniform3f(m_lightPos, lightPosition.x, lightPosition.y, lightPosition.z);
+			glUniform3f(m_camPos, m_camera->getCameraPos().x, m_camera->getCameraPos().y, m_camera->getCameraPos().z);
 			m_sphere15->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
 		}
 	}
@@ -768,6 +895,10 @@ void Graphics::Render()
 				printf("Sampler Not found not found\n");
 			}
 			glUniform1i(sampler, 0);
+			std::cout << light.x << " " << light.y << " " << light.z << " " << light.w << std::endl;
+			glUniform4f(m_lightColor, light.x, light.y, light.z, light.w);
+			glUniform3f(m_lightPos, lightPosition.x, lightPosition.y, lightPosition.z);
+			glUniform3f(m_camPos, m_camera->getCameraPos().x, m_camera->getCameraPos().y, m_camera->getCameraPos().z);
 			m_sphere16->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
 		}
 	}
@@ -783,13 +914,32 @@ void Graphics::Render()
 				printf("Sampler Not found not found\n");
 			}
 			glUniform1i(sampler, 0);
+			glUniform4f(m_lightColor, light.x, light.y, light.z, light.w);
+			glUniform3f(m_lightPos, lightPosition.x, lightPosition.y, lightPosition.z);
+			glUniform3f(m_camPos, m_camera->getCameraPos().x, m_camera->getCameraPos().y, m_camera->getCameraPos().z);
 			m_sphere17->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
 		}
+
+	
+
 	}
 	
-
-	
-
+	glDepthFunc(GL_LEQUAL);
+	m_skyboxshader->Enable();
+	glUniformMatrix4fv(m_projectionMatrix3, 1, GL_FALSE, glm::value_ptr(glm::mat4(glm::mat3(m_camera->GetProjection()))));
+	glUniformMatrix4fv(m_viewMatrix3, 1, GL_FALSE, glm::value_ptr(m_camera->GetView()));
+	if (m_cubemap != NULL) {
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubemap->getTextureID());
+		GLuint sampler = m_skyboxshader->GetUniformLocation("skybox");
+		if (sampler == INVALID_UNIFORM_LOCATION)
+		{
+			printf("Sampler Not found not found\n");
+		}
+		glUniform1i(sampler, 0);
+		//m_cubemap->Render(m_positionAttrib);
+	}
+	glDepthFunc(GL_LESS);
 
 	// Get any errors from OpenGL
 	auto error = glGetError();
@@ -856,6 +1006,116 @@ bool Graphics::collectShPrLocs() {
 		printf("hasTexture uniform not found\n");
 		anyProblem = false;
 	}
+
+	m_lightColor = m_shader->GetUniformLocation("lightColor");
+	if (m_lightColor == INVALID_UNIFORM_LOCATION) {
+		printf("lightColor uniform not found\n");
+		anyProblem = false;
+	}
+
+	m_lightPos = m_shader->GetUniformLocation("lightPos");
+	if (m_lightPos == INVALID_UNIFORM_LOCATION) {
+		printf("lightPos uniform not found\n");
+		anyProblem = false;
+	}
+
+	m_camPos = m_shader->GetUniformLocation("camPos");
+	if (m_camPos == INVALID_UNIFORM_LOCATION) {
+		printf("camPos uniform not found\n");
+		anyProblem = false;
+	}
+
+
+	m_projectionMatrix2 = m_lightshader->GetUniformLocation("projectionMatrix");
+	if (m_projectionMatrix2 == INVALID_UNIFORM_LOCATION)
+	{
+		printf("m_projectionMatrix not found\n");
+		anyProblem = false;
+	}
+
+	// Locate the view matrix in the shader
+	m_viewMatrix2 = m_lightshader->GetUniformLocation("viewMatrix");
+	if (m_viewMatrix2 == INVALID_UNIFORM_LOCATION)
+	{
+		printf("m_viewMatrix not found\n");
+		anyProblem = false;
+	}
+
+	// Locate the model matrix in the shader
+	m_modelMatrix2 = m_lightshader->GetUniformLocation("modelMatrix");
+	if (m_modelMatrix2 == INVALID_UNIFORM_LOCATION)
+	{
+		printf("m_modelMatrix not found\n");
+		anyProblem = false;
+	}
+
+	// Locate the position vertex attribute
+	m_positionAttrib2 = m_lightshader->GetAttribLocation("v_position");
+	if (m_positionAttrib2 == -1)
+	{
+		printf("v_position attribute not found\n");
+		anyProblem = false;
+	}
+
+	// Locate the color vertex attribute
+	m_colorAttrib2 = m_lightshader->GetAttribLocation("v_color");
+	if (m_colorAttrib2 == -1)
+	{
+		printf("v_color attribute not found\n");
+		anyProblem = false;
+	}
+
+	// Locate the color vertex attribute
+	m_tcAttrib2 = m_lightshader->GetAttribLocation("v_tc");
+	if (m_tcAttrib2 == -1)
+	{
+		printf("v_texcoord attribute not found\n");
+		anyProblem = false;
+	}
+
+	m_hasTexture2 = m_lightshader->GetUniformLocation("hasTexture");
+	if (m_hasTexture2 == INVALID_UNIFORM_LOCATION) {
+		printf("hasTexture uniform not found\n");
+		anyProblem = false;
+	}
+
+	m_lightColor2 = m_lightshader->GetUniformLocation("lightColor");
+	if (m_lightColor2 == INVALID_UNIFORM_LOCATION) {
+		printf("lightColor uniform not found\n");
+		anyProblem = false;
+	}
+
+	m_projectionMatrix3 = m_skyboxshader->GetUniformLocation("projectionMatrix");
+	if (m_projectionMatrix3 == INVALID_UNIFORM_LOCATION)
+	{
+		printf("m_projectionMatrix not found\n");
+		anyProblem = false;
+	}
+
+	// Locate the view matrix in the shader
+	m_viewMatrix3 = m_skyboxshader->GetUniformLocation("viewMatrix");
+	if (m_viewMatrix3 == INVALID_UNIFORM_LOCATION)
+	{
+		printf("m_viewMatrix not found\n");
+		anyProblem = false;
+	}
+
+	// Locate the model matrix in the shader
+	m_modelMatrix3 = m_skyboxshader->GetUniformLocation("modelMatrix");
+	if (m_modelMatrix3 == INVALID_UNIFORM_LOCATION)
+	{
+		printf("m_modelMatrix not found\n");
+		anyProblem = false;
+	}
+
+	m_positionAttrib3 = m_skyboxshader->GetAttribLocation("v_position");
+	if (m_positionAttrib3 == -1)
+	{
+		printf("v_position attribute not found\n");
+		anyProblem = false;
+	}
+
+
 
 	return anyProblem;
 }

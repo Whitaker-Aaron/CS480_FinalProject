@@ -1,11 +1,12 @@
-#include "shader.h"
+#include "skyboxShader.h"
 
-Shader::Shader()
+
+Skyboxshader::Skyboxshader()
 {
     m_shaderProg = 0;
 }
 
-Shader::~Shader()
+Skyboxshader::~Skyboxshader()
 {
     for (std::vector<GLuint>::iterator it = m_shaderObjList.begin(); it != m_shaderObjList.end(); it++)
     {
@@ -19,7 +20,7 @@ Shader::~Shader()
     }
 }
 
-bool Shader::Initialize()
+bool Skyboxshader::Initialize()
 {
     m_shaderProg = glCreateProgram();
 
@@ -33,7 +34,7 @@ bool Shader::Initialize()
 }
 
 // Use this method to add shaders to the program. When finished - call finalize()
-bool Shader::AddShader(GLenum ShaderType)
+bool Skyboxshader::AddShader(GLenum ShaderType)
 {
     std::string s;
 
@@ -42,26 +43,19 @@ bool Shader::AddShader(GLenum ShaderType)
         s = "#version 460\n \
           \
           layout (location = 0) in vec3 v_position; \
-          layout (location = 1) in vec3 v_color; \
-          layout (location = 2) in vec2 v_tc;  \
              \
-          out vec3 color; \
-          out vec2 tc;\
-          out vec3 crntPos;\
+          out vec3 tc;\
           \
           uniform mat4 projectionMatrix; \
           uniform mat4 viewMatrix; \
           uniform mat4 modelMatrix; \
-          uniform bool hasTC;        \
-          uniform sampler2D sp; \
           \
           void main(void) \
           { \
             vec4 v = vec4(v_position, 1.0); \
-            gl_Position = (projectionMatrix * viewMatrix * modelMatrix) * v; \
-            crntPos = vec3(modelMatrix * vec4(v_position, 1.0));\
-            color = v_color; \
-            tc = v_tc;\
+            vec4 pos = projectionMatrix * viewMatrix * v;\
+            gl_Position = vec4(pos.x, pos.y, pos.w, pos.w); \
+            tc = vec3(v_position.x, v_position.y, -v_position.z);\
           } \
           ";
     }
@@ -69,37 +63,18 @@ bool Shader::AddShader(GLenum ShaderType)
     {
         s = "#version 460\n \
           \
-          uniform sampler2D sp; \
+          uniform samplerCube skybox; \
           \
-          in vec3 color; \
-          in vec2 tc;\
-          in vec3 crntPos;\
-          uniform bool hasTexture;\
-          uniform vec4 lightColor;\
-          uniform vec3 lightPos;\
-          uniform vec3 camPos; \
+          in vec3 tc;\
           \
           out vec4 frag_color; \
           \
           void main(void) \
           { \
             \
-            float ambient = 0.20f;\
-            vec3 normal = normalize(color);\
-            vec3 lightDirection = normalize(lightPos - crntPos);\
-            float diffuse = max(dot(normal, lightDirection), 0.0f);\
             \
-            float specularLight = 0.50f; \
-            vec3 viewDirection = normalize(camPos - crntPos); \
-            vec3 reflectionDirection = reflect(-lightDirection, normal); \
-            float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.0f), 8); \
-            float specular = specAmount * specularLight; \
+               frag_color = texture(skybox, tc); \
             \
-             if(hasTexture)\
-               frag_color = texture(sp,tc) * vec4(1.0, 1.0, 1.0, 1.0) * (diffuse + ambient + specular); \
-            \
-            else \
-			   frag_color = vec4(color.rgb, 1.0);\
           } \
           ";
     }
@@ -142,7 +117,7 @@ bool Shader::AddShader(GLenum ShaderType)
 
 // After all the shaders have been added to the program call this function
 // to link and validate the program.
-bool Shader::Finalize()
+bool Skyboxshader::Finalize()
 {
     GLint Success = 0;
     GLchar ErrorLog[1024] = { 0 };
@@ -178,13 +153,13 @@ bool Shader::Finalize()
 }
 
 
-void Shader::Enable()
+void Skyboxshader::Enable()
 {
     glUseProgram(m_shaderProg);
 }
 
 
-GLint Shader::GetUniformLocation(const char* pUniformName)
+GLint Skyboxshader::GetUniformLocation(const char* pUniformName)
 {
     GLuint Location = glGetUniformLocation(m_shaderProg, pUniformName);
 
@@ -195,7 +170,7 @@ GLint Shader::GetUniformLocation(const char* pUniformName)
     return Location;
 }
 
-GLint Shader::GetAttribLocation(const char* pAttribName)
+GLint Skyboxshader::GetAttribLocation(const char* pAttribName)
 {
     GLuint Location = glGetAttribLocation(m_shaderProg, pAttribName);
 

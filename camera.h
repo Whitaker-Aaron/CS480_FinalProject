@@ -12,7 +12,14 @@ public:
     glm::mat4 GetProjection();
     glm::mat4 GetView();
 
-    void updateViewMatrix(bool arr[], double xcoord, double ycoord, int zed, float rotAngle, glm::vec3 rotVec);
+
+
+    int getHeight() { return Height; }
+    int getWidth() { return Width;  }
+    glm::vec3 getCameraPos() { return cameraPos; }
+
+
+    bool updateViewMatrix(bool arr[], double xcoord, double ycoord, int zed, float rotAngle, glm::vec3 rotVec);
     void updateProjectionMatrix(float offset);
 
 private:
@@ -29,7 +36,13 @@ private:
     double posY = 0.0;
     double posZ = -16.0;
 
+    bool clicked;
+
+
     int Width, Height;
+
+
+
 
     double fov = 45;
 

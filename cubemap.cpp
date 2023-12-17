@@ -1,10 +1,10 @@
 
 #include "cubemap.h"
 
-Cubemap::Cubemap(const char* fileName) {
+Cubemap::Cubemap() {
 
-	file = fileName;
-	m_texture = new Texture(fileName);
+	
+	m_texture = new Texture(facesCubemap);
 	if (m_texture)
 		hasTex = true;
 	else
@@ -14,58 +14,7 @@ Cubemap::Cubemap(const char* fileName) {
 	//initializeTexture();
 }
 
-Cubemap::Cubemap() {
-	m_TextureID = -1;
-	printf("No Texture Data Provided.");
-}
 
-bool Cubemap::loadTexture(const char* texFile) {
-	/*m_TextureID = SOIL_load_OGL_texture(texFile, SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_INVERT_Y);
-	if (!m_TextureID) {
-		printf("Failed: Could not open texture file!\n");
-		return false;
-	}
-	std::cout << "Texture loaded" << std::endl;
-	return true;*/
-	return true;
-}
-
-bool Cubemap::initializeTexture() {
-
-	glGenerateMipmap(GL_TEXTURE_2D);
-	glTexParameteri(GL_TEXTURE_2D,
-		GL_TEXTURE_MIN_FILTER,
-		GL_LINEAR_MIPMAP_LINEAR);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-
-
-
-
-	return true;
-}
-
-unsigned int Cubemap::loadCubemap() {
-
-
-
-
-
-
-
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-
-	return 0;
-
-
-
-}
 
 void Cubemap::setupVertices() {
 
@@ -117,4 +66,28 @@ bool Cubemap::InitBuffers() {
 	//glVertexAttribPointer(posAttribLoc, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
 
 
+}
+
+void Cubemap::Render(GLint posAttribLoc)
+{
+
+	glBindVertexArray(vao);
+
+	// Enable vertex attibute arrays for each vertex attrib
+	glEnableVertexAttribArray(posAttribLoc);
+
+	// Bind your VBO
+	glBindBuffer(GL_ARRAY_BUFFER, VB);
+
+	// Set vertex attribute pointers to the load correct data
+	glVertexAttribPointer(posAttribLoc, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
+
+	// Bind your Element Array
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IB);
+
+	// Render
+	glDrawElements(GL_TRIANGLES, Indices.size(), GL_UNSIGNED_INT, 0);
+
+	// Disable vertex arrays
+	glDisableVertexAttribArray(posAttribLoc);
 }

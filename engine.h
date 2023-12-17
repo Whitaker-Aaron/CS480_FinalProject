@@ -36,6 +36,10 @@ private:
     int m_WINDOW_WIDTH;
     int m_WINDOW_HEIGHT;
     bool m_FULLSCREEN;
+    
+    bool firstClick;
+    bool wasClicked;
+
 
     glm::vec3 rotVec = { 0.f, 0.f, 0.f };
     float rotAngle = 0;

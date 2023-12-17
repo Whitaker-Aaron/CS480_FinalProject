@@ -8,20 +8,30 @@ class Cubemap
 
 public:
 	Cubemap();
-	Cubemap(const char* fileName);
-	bool loadTexture(const char* texFile);
 	GLuint getTextureID() { return m_TextureID; }
-	unsigned int loadCubemap();
-	void setupVertices();
-
+	bool InitBuffers();
+	void Render(GLint posAttribLoc);
 
 private:
 	GLuint m_TextureID;
 	const char* file;
 	std::vector<Vertex> Vertices;
 	std::vector<unsigned int> Indices;
-	bool InitBuffers();
+
+	void setupVertices();
+	
+	
 	bool hasTex;
+
+	const char* facesCubemap[6] = {
+		"FinalProjectAssets\\bkg\\blue\\bkg1_right.png",
+		"FinalProjectAssets\\bkg\\blue\\bkg1_left.png",
+		"FinalProjectAssets\\bkg\\blue\\bkg1_top.png",
+		"FinalProjectAssets\\bkg\\blue\\bkg1_bot.png",
+		"FinalProjectAssets\\bkg\\blue\\bkg1_front.png",
+		"FinalProjectAssets\\bkg\\blue\\bkg1_back.png"
+	};
+
 
 	Texture* m_texture;
 
@@ -30,7 +40,5 @@ private:
 
 	GLuint vao;
 
-
-	bool initializeTexture();
 
 };

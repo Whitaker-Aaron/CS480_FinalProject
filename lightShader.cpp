@@ -1,11 +1,12 @@
-#include "shader.h"
+#include "lightShader.h"
 
-Shader::Shader()
+
+Lightshader::Lightshader()
 {
     m_shaderProg = 0;
 }
 
-Shader::~Shader()
+Lightshader::~Lightshader()
 {
     for (std::vector<GLuint>::iterator it = m_shaderObjList.begin(); it != m_shaderObjList.end(); it++)
     {
@@ -19,7 +20,7 @@ Shader::~Shader()
     }
 }
 
-bool Shader::Initialize()
+bool Lightshader::Initialize()
 {
     m_shaderProg = glCreateProgram();
 
@@ -33,7 +34,7 @@ bool Shader::Initialize()
 }
 
 // Use this method to add shaders to the program. When finished - call finalize()
-bool Shader::AddShader(GLenum ShaderType)
+bool Lightshader::AddShader(GLenum ShaderType)
 {
     std::string s;
 
@@ -47,7 +48,6 @@ bool Shader::AddShader(GLenum ShaderType)
              \
           out vec3 color; \
           out vec2 tc;\
-          out vec3 crntPos;\
           \
           uniform mat4 projectionMatrix; \
           uniform mat4 viewMatrix; \
@@ -59,7 +59,6 @@ bool Shader::AddShader(GLenum ShaderType)
           { \
             vec4 v = vec4(v_position, 1.0); \
             gl_Position = (projectionMatrix * viewMatrix * modelMatrix) * v; \
-            crntPos = vec3(modelMatrix * vec4(v_position, 1.0));\
             color = v_color; \
             tc = v_tc;\
           } \
@@ -73,33 +72,18 @@ bool Shader::AddShader(GLenum ShaderType)
           \
           in vec3 color; \
           in vec2 tc;\
-          in vec3 crntPos;\
           uniform bool hasTexture;\
-          uniform vec4 lightColor;\
-          uniform vec3 lightPos;\
-          uniform vec3 camPos; \
+          uniform vec3 lightColor;\
           \
           out vec4 frag_color; \
           \
           void main(void) \
           { \
-            \
-            float ambient = 0.20f;\
-            vec3 normal = normalize(color);\
-            vec3 lightDirection = normalize(lightPos - crntPos);\
-            float diffuse = max(dot(normal, lightDirection), 0.0f);\
-            \
-            float specularLight = 0.50f; \
-            vec3 viewDirection = normalize(camPos - crntPos); \
-            vec3 reflectionDirection = reflect(-lightDirection, normal); \
-            float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.0f), 8); \
-            float specular = specAmount * specularLight; \
-            \
              if(hasTexture)\
-               frag_color = texture(sp,tc) * vec4(1.0, 1.0, 1.0, 1.0) * (diffuse + ambient + specular); \
+               frag_color = texture(sp,tc);\
             \
             else \
-			   frag_color = vec4(color.rgb, 1.0);\
+			   frag_color = vec4(color.rgb, 1.0) ;\
           } \
           ";
     }
@@ -142,7 +126,7 @@ bool Shader::AddShader(GLenum ShaderType)
 
 // After all the shaders have been added to the program call this function
 // to link and validate the program.
-bool Shader::Finalize()
+bool Lightshader::Finalize()
 {
     GLint Success = 0;
     GLchar ErrorLog[1024] = { 0 };
@@ -178,13 +162,13 @@ bool Shader::Finalize()
 }
 
 
-void Shader::Enable()
+void Lightshader::Enable()
 {
     glUseProgram(m_shaderProg);
 }
 
 
-GLint Shader::GetUniformLocation(const char* pUniformName)
+GLint Lightshader::GetUniformLocation(const char* pUniformName)
 {
     GLuint Location = glGetUniformLocation(m_shaderProg, pUniformName);
 
@@ -195,7 +179,7 @@ GLint Shader::GetUniformLocation(const char* pUniformName)
     return Location;
 }
 
-GLint Shader::GetAttribLocation(const char* pAttribName)
+GLint Lightshader::GetAttribLocation(const char* pAttribName)
 {
     GLuint Location = glGetAttribLocation(m_shaderProg, pAttribName);
 

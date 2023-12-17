@@ -174,16 +174,32 @@ void Engine::ProcessInput()
 
     if (glfwGetMouseButton(m_window->getWindow(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
         input[8] = true;
-        std::cout << "LEFT MOUSE HITTTT" << std::endl;
+        
+        glfwSetInputMode(m_window->getWindow(), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+        if (firstClick) {
+            glfwSetCursorPos(m_window->getWindow(), (m_graphics->getCamera()->getWidth() / 2), (m_graphics->getCamera()->getHeight() / 2));
+            firstClick = false;
+        }
+     
+
         //   m_graphics->getCamera()->updateViewMatrix(glm::vec3(0.1f, 0.0f, 0.0f), rotAngle, rotVec);
+    }
+
+    else if (glfwGetMouseButton(m_window->getWindow(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE) {
+        glfwSetInputMode(m_window->getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        firstClick = true;
     }
 
 
 
-    if(glfwGetKey)
+    
 
     
-    m_graphics->getCamera()->updateViewMatrix(input, 0, cursor_x, cursor_y, rotAngle, rotVec);
+    wasClicked = m_graphics->getCamera()->updateViewMatrix(input, 0, cursor_x, cursor_y, rotAngle, rotVec);
+    if (wasClicked) {
+        glfwSetCursorPos(m_window->getWindow(), (m_graphics->getCamera()->getWidth() / 2), (m_graphics->getCamera()->getHeight() / 2));
+    }
+
 
 }
 
